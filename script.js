@@ -43,14 +43,6 @@ function drawScoreBoard() {
 	ctx.fillText('Score:' + score, 8, 9);
 }
 
-function drawGameOver() {
-	let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-	gradient.addColorStop('0', 'blue');
-	ctx.rect(120, 75, 200, 100);
-	ctx.fillStyle = gradient;
-	ctx.fillText('Game Over', 120, 75);
-}
-
 function moveSnake() {
 	if (direction) {
 		for (let i = snake.segment.length - 1; i > 0; i--) {
@@ -96,30 +88,33 @@ window.addEventListener('keydown', (e) => {
 });
 
 function reset() {
+	clearInterval(interval);
 	window.location.reload();
 }
 
 function appleDetection() {
-	if (
-		snake.segment[0].x < apple.x + apple.w &&
-		snake.segment[0].x + snake.w > apple.x &&
-		snake.segment[0].y < apple.y + apple.h &&
-		snake.segment[0].y + snake.h > apple.y
-	) {
-		eatApple();
+	const snakeHeadX = snake.segment[0].x; 
+	const snakeHeadY = snake.segment[0].y;
+	const appleX = apple.x; 
+	const appleY = apple.y; 
+
+
+
+	if ((snakeHeadX === appleX) && (snakeHeadY === appleY)) {
+		placeApple();
 		let newTail = Object.assign({}, snake.segment.length + 1);
 		snake.segment.push(newTail);
+		score++;
 	}
 }
 
-function eatApple() {
-	apple.x = Math.floor(Math.random(SNAKE_SPEED) * canvas.width);
-	apple.y = Math.floor(Math.random(SNAKE_SPEED) * canvas.height);
-	score++;
+function placeApple() {
+	apple.x = Math.floor(Math.random() * (canvas.width / SNAKE_SPEED)) * SNAKE_SPEED;
+	apple.y = Math.floor(Math.random() * (canvas.height / SNAKE_SPEED)) * SNAKE_SPEED;
 }
 
 window.onload = () => {
-	setInterval(() => {
+	interval = setInterval(() => {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawApple();
 		drawSnake();
@@ -127,19 +122,23 @@ window.onload = () => {
 		moveSnake();
 		appleDetection();
 		bodyCollision();
+		wallCollision(); 
 
-		if (snake.segment[0].x + SNAKE_SPEED > canvas.width || snake.segment[0].x + SNAKE_SPEED < 0) {
-			drawGameOver();
-			alert('You ran into a wall!');
-			reset();
-		}
-		if (snake.segment[0].y + SNAKE_SPEED > canvas.height || snake.segment[0].y + SNAKE_SPEED < 0) {
-			drawGameOver();
-			alert('You ran into a wall!');
-			reset();
-		}
 	}, 100);
 };
+
+function wallCollision() {
+	
+	if (snake.segment[0].x + SNAKE_SPEED > canvas.width || snake.segment[0].x + SNAKE_SPEED < 0) {
+		alert('You ran into a wall!');
+		reset();
+	}
+	if (snake.segment[0].y + SNAKE_SPEED > canvas.height || snake.segment[0].y + SNAKE_SPEED < 0) {
+		alert('You ran into a wall!');
+		reset();
+	}
+}
+
 
 function bodyCollision() {
 	for (let i = 1; i < snake.segment.length; i++) {
@@ -151,4 +150,3 @@ function bodyCollision() {
 	}
 }
 
-drawGameOver();
